@@ -17,10 +17,8 @@ let latestJob = null;
 client.on("messageCreate", (message) => {
   if (message.channel.id !== CHANNEL_ID) return;
 
-  // Check plain text content
   let text = message.content;
 
-  // Also check embeds
   if (message.embeds.length > 0) {
     message.embeds.forEach(embed => {
       if (embed.description) text += " " + embed.description;
@@ -32,12 +30,17 @@ client.on("messageCreate", (message) => {
     });
   }
 
-  const match = text.match(/placeId=(\d+)&gameInstanceId=([\w-]+)/);
-  if (match) {
-    latestJob = {
-      placeId: match[1],
-      jobId: match[2]
-    };
+  // Match full URL format
+  const urlMatch = text.match(/placeId=(\d+)&gameInstanceId=([\w-]+)/);
+  if (urlMatch) {
+    latestJob = { placeId: urlMatch[1], jobId: urlMatch[2] };
+    return;
+  }
+
+  // Match raw UUID format
+  const uuidMatch = text.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/);
+  if (uuidMatch) {
+    latestJob = { placeId: "142823291", jobId: uuidMatch[0] };
   }
 });
 
